@@ -61,5 +61,4 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 
-#remove personal config file
 *.conf
