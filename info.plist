@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string>com.jeffssss</string>
+	<key>connections</key>
+	<dict>
+		<key>FA3AB11F-AC4B-41CC-92A2-5D42D53C80DC</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>BA2B09E0-217C-400B-A0B4-13E8F892062B</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>jeffssss</string>
+	<key>description</key>
+	<string>网站快捷打开</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>fastweb</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>127</integer>
+				<key>script</key>
+				<string># -*- coding: utf-8 -*-
+
+'''
+dp workflow
+
+Author: Jeffssss
+
+'''
+import sys
+import webbrowser
+
+originStr = u'{query}'
+url = ''
+#获取key对应的结果
+result = originStr
+if(result.lower().startswith('http')):
+	url = result;
+else:
+	url = 'http://'+result;
+sys.path.append("libs")
+webbrowser.open(url)
+</string>
+				<key>type</key>
+				<integer>3</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>BA2B09E0-217C-400B-A0B4-13E8F892062B</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>127</integer>
+				<key>keyword</key>
+				<string>f</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>0</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>请等待</string>
+				<key>script</key>
+				<string># -*- coding: utf-8 -*-
+
+'''
+dp workflow
+
+Author: Jeffssss
+
+'''
+import ConfigParser
+
+cf = ConfigParser.ConfigParser()
+cf.read("data.conf")
+section = "mapping"
+
+originStr = u'{query}'
+#originStr = 'hy'
+
+resultStr = ''
+#获取类似的结果
+entries = cf.items(section)
+for (key, value) in entries :
+	if(key.lower().startswith(originStr) and key != originStr):
+		resultStr = resultStr + '&lt;item uid="dpflow" arg="' + value + '"&gt;&lt;title&gt;' + key + '&lt;/title&gt;&lt;subtitle&gt;' + value + '&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;'
+#获取key对应的结果
+try:
+	result = cf.get(section,originStr)
+	resultStr = resultStr + '&lt;item uid="dpflow" arg="' + result + '" valid="yes"&gt;&lt;title&gt;' + originStr + '&lt;/title&gt;&lt;subtitle&gt;' + result + '&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;'
+except Exception, e:
+	pass
+#判断是否无结果
+if(resultStr == '' ):
+	resultStr = '&lt;item uid="dpflow" arg="null"&gt;&lt;title&gt;no result&lt;/title&gt;&lt;subtitle&gt;无结果&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;'
+
+resultStr = '&lt;?xml version="1.0"?&gt;&lt;items&gt;' + resultStr + '&lt;/items&gt;'
+print resultStr
+</string>
+				<key>subtext</key>
+				<string>例如 f my</string>
+				<key>title</key>
+				<string>请输入拼音或简写</string>
+				<key>type</key>
+				<integer>3</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>FA3AB11F-AC4B-41CC-92A2-5D42D53C80DC</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string>网站快捷打开</string>
+	<key>uidata</key>
+	<dict>
+		<key>BA2B09E0-217C-400B-A0B4-13E8F892062B</key>
+		<dict>
+			<key>ypos</key>
+			<real>180</real>
+		</dict>
+		<key>FA3AB11F-AC4B-41CC-92A2-5D42D53C80DC</key>
+		<dict>
+			<key>ypos</key>
+			<real>180</real>
+		</dict>
+	</dict>
+	<key>webaddress</key>
+	<string>https://jeffssss.github.com/</string>
+</dict>
+</plist>
