@@ -31,46 +31,6 @@
 		<dict>
 			<key>config</key>
 			<dict>
-				<key>concurrently</key>
-				<false/>
-				<key>escaping</key>
-				<integer>127</integer>
-				<key>script</key>
-				<string># -*- coding: utf-8 -*-
-
-'''
-dp workflow
-
-Author: Jeffssss
-
-'''
-import sys
-import webbrowser
-
-originStr = u'{query}'
-url = ''
-#获取key对应的结果
-result = originStr
-if(result.lower().startswith('http')):
-	url = result;
-else:
-	url = 'http://'+result;
-sys.path.append("libs")
-webbrowser.open(url)
-</string>
-				<key>type</key>
-				<integer>3</integer>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.script</string>
-			<key>uid</key>
-			<string>BA2B09E0-217C-400B-A0B4-13E8F892062B</string>
-			<key>version</key>
-			<integer>0</integer>
-		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
 				<key>argumenttype</key>
 				<integer>0</integer>
 				<key>escaping</key>
@@ -97,32 +57,63 @@ Author: Jeffssss
 
 '''
 import ConfigParser
+import re
 
 cf = ConfigParser.ConfigParser()
 cf.read("data.conf")
 section = "mapping"
 
 originStr = u'{query}'
-#originStr = 'hy'
-
+#originStr = 'add\\ a\\ www.baidu.com'
+originStr = originStr.strip().replace('\\','')
 resultStr = ''
-#获取类似的结果
-entries = cf.items(section)
-for (key, value) in entries :
-	if(key.lower().startswith(originStr) and key != originStr):
-		resultStr = resultStr + '&lt;item uid="dpflow" arg="' + value + '"&gt;&lt;title&gt;' + key + '&lt;/title&gt;&lt;subtitle&gt;' + value + '&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;'
-#获取key对应的结果
-try:
-	result = cf.get(section,originStr)
-	resultStr = resultStr + '&lt;item uid="dpflow" arg="' + result + '" valid="yes"&gt;&lt;title&gt;' + originStr + '&lt;/title&gt;&lt;subtitle&gt;' + result + '&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;'
-except Exception, e:
-	pass
-#判断是否无结果
-if(resultStr == '' ):
-	resultStr = '&lt;item uid="dpflow" arg="null"&gt;&lt;title&gt;no result&lt;/title&gt;&lt;subtitle&gt;无结果&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;'
 
-resultStr = '&lt;?xml version="1.0"?&gt;&lt;items&gt;' + resultStr + '&lt;/items&gt;'
-print resultStr
+wordList = re.split("\s+", originStr)
+
+#命令词:add delete
+#显示命令词的说明
+
+if( len(wordList) == 1):
+	if(wordList[0] == 'add'):
+		print '&lt;?xml version="1.0"?&gt;&lt;items&gt;&lt;item uid="fastweb" arg=""&gt;&lt;title&gt;使用add命令添加记录&lt;/title&gt;&lt;subtitle&gt;用法：f add keyname url 例如f add baidu https://www.baidu.com&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;&lt;/items&gt;'
+	elif (wordList[0] == 'delete'):
+		print '&lt;?xml version="1.0"?&gt;&lt;items&gt;&lt;item uid="fastweb" arg=""&gt;&lt;title&gt;使用delete命令删除记录&lt;/title&gt;&lt;subtitle&gt;用法：f delete keyname 例如f delete baidu&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;&lt;/items&gt;'
+	else :
+		#获取类似的结果
+		entries = cf.items(section)
+		for (key, value) in entries :
+			if(key.lower().startswith(originStr) and key != originStr):
+				argstr = '{\'type\':\'open\', \'value\':\'' + value + '\'}'
+				resultStr = resultStr + '&lt;item uid="dpflow" arg="' + argstr + '"&gt;&lt;title&gt;' + key + '&lt;/title&gt;&lt;subtitle&gt;' + value + '&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;'
+		#获取key对应的结果
+		try:
+			result = cf.get(section,originStr)
+			argstr = '{\'type\':\'open\', \'value\':\'' + result + '\'}'
+			resultStr = resultStr + '&lt;item uid="dpflow" arg="' + argstr + '" valid="yes"&gt;&lt;title&gt;' + originStr + '&lt;/title&gt;&lt;subtitle&gt;' + result + '&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;'
+		except Exception, e:
+			pass
+		#判断是否无结果
+		if(resultStr == '' ):
+			resultStr = '&lt;item uid="fastweb" arg=""&gt;&lt;title&gt;找不到对应的结果&lt;/title&gt;&lt;subtitle&gt;你这是在调戏我 :)&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;'
+		resultStr = '&lt;?xml version="1.0"?&gt;&lt;items&gt;' + resultStr + '&lt;/items&gt;'
+		print resultStr
+elif ( len(wordList) == 2):
+	if(wordList[0] == 'add'):
+		print '&lt;?xml version="1.0"?&gt;&lt;items&gt;&lt;item uid="fastweb" arg=""&gt;&lt;title&gt;使用add命令添加记录&lt;/title&gt;&lt;subtitle&gt;' + str(wordList[1]) + '&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;&lt;/items&gt;'
+	elif (wordList[0] == 'delete'):
+		argstr = '{\'type\':\'delete\', \'value\':\'' + str(wordList[1]) + '\'}'
+		print '&lt;?xml version="1.0"?&gt;&lt;items&gt;&lt;item uid="fastweb" arg="' + argstr +'"&gt;&lt;title&gt;删除记录&lt;/title&gt;&lt;subtitle&gt;删除key:'+ str(wordList[1]) +'&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;&lt;/items&gt;'
+	else :
+		print '&lt;?xml version="1.0"?&gt;&lt;items&gt;&lt;item uid="fastweb" arg=""&gt;&lt;title&gt;格式有问题&lt;/title&gt;&lt;subtitle&gt;你快去检查检查&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;&lt;/items&gt;'
+elif ( len(wordList) == 3):
+	if(wordList[0] == 'add'):
+		argstr = '{\'type\':\'add\',\'key\':\' '+ str(wordList[1]) +'\', \'value\':\'' + str(wordList[2]) + '\'}'
+		print '&lt;?xml version="1.0"?&gt;&lt;items&gt;&lt;item uid="fastweb" arg="'+ argstr +'"&gt;&lt;title&gt;添加记录&lt;/title&gt;&lt;subtitle&gt;添加key:'+ str(wordList[1]) +' value:' + str(wordList[2]) + '&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;&lt;/items&gt;'
+	else :
+		print '&lt;?xml version="1.0"?&gt;&lt;items&gt;&lt;item uid="fastweb" arg=""&gt;&lt;title&gt;反正就是出错了&lt;/title&gt;&lt;subtitle&gt;你这种格式我看不懂诶~&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;&lt;/items&gt;'
+else :
+	print '&lt;?xml version="1.0"?&gt;&lt;items&gt;&lt;item uid="fastweb" arg=""&gt;&lt;title&gt;反正就是出错了&lt;/title&gt;&lt;subtitle&gt;你这种格式我看不懂诶~&lt;/subtitle&gt;&lt;icon&gt;icon.png&lt;/icon&gt;&lt;/item&gt;&lt;/items&gt;'
+
 </string>
 				<key>subtext</key>
 				<string>例如 f my</string>
@@ -137,6 +128,66 @@ print resultStr
 			<string>alfred.workflow.input.scriptfilter</string>
 			<key>uid</key>
 			<string>FA3AB11F-AC4B-41CC-92A2-5D42D53C80DC</string>
+			<key>version</key>
+			<integer>0</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>concurrently</key>
+				<false/>
+				<key>escaping</key>
+				<integer>68</integer>
+				<key>script</key>
+				<string># -*- coding: utf-8 -*-
+
+'''
+dp workflow
+
+Author: Jeffssss
+
+'''
+import ConfigParser
+import sys
+import webbrowser
+import json
+
+originStr = "{query}"
+originStr = originStr.replace('\'','\"')
+url = ''
+
+cf = ConfigParser.ConfigParser()
+cf.read("data.conf")
+section = "mapping"
+
+#获取key对应的结果
+result = json.loads(originStr)
+if(result['type'] == 'open'):
+	resultStr = str(result['value']).strip()
+	if(resultStr.lower().startswith('http')):
+		url = resultStr;
+	else:
+		url = 'http://'+resultStr;
+	sys.path.append("libs")
+	webbrowser.open(url)
+elif (result['type'] == 'delete'):
+	resultStr = str(result['value']).strip()
+	cf.remove_option(section, resultStr)
+	cf.write(open("data.conf", "w"))
+elif (result['type'] == 'add'):
+	resultkey = str(result['key']).strip()
+	resultValue = str(result['value']).strip()
+	cf.set(section,resultkey,resultValue)
+	cf.write(open("data.conf", "w"))
+
+</string>
+				<key>type</key>
+				<integer>3</integer>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.script</string>
+			<key>uid</key>
+			<string>BA2B09E0-217C-400B-A0B4-13E8F892062B</string>
 			<key>version</key>
 			<integer>0</integer>
 		</dict>
